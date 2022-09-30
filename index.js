@@ -19,6 +19,8 @@ let authToken = process.env['TWITCH_ACCESS_TOKEN']
 let ngrokUrl = process.env['NGROK_TUNNEL_URL']
 
 app.post('/createWebhook/:broadcasterId', (req, res) => {
+
+    // si checkStreamer == true alors on continue
     var createWebHookParams = {
         host: "api.twitch.tv",
         path: "helix/eventsub/subscriptions",
@@ -65,6 +67,27 @@ function verifySignature(messageSignature, messageID, messageTimestamp, body) {
 
     return expectedSignatureHeader === messageSignature
 }
+
+// function to check if the streamers has the right to set the webhook 
+// Send post request to laravel api (yotsupet.com/api/streamer) to see if the streamer is in the database
+function checkStreamer(streamerId) {
+    var checkStreamerParams = {
+        host: "yotsupet.com",
+        path: "/api/streamer",
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json",
+        }
+    };
+    var checkStreamerBody = {
+        "streamerId": streamerId
+    };
+
+    // si le streamer est dans la table des streameurs autorisés & n'a pas déja de webhook
+    // return true
+
+}
+ 
 
 app.post('/notification', (req, res) => {
     if (!verifySignature(req.header("Twitch-Eventsub-Message-Signature"),
